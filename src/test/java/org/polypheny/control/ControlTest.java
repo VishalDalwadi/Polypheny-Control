@@ -30,9 +30,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.polypheny.control.authentication.AuthenticationDataManager;
+import org.polypheny.control.authentication.AuthenticationFileManager;
+import org.polypheny.control.client.ClientData;
 import org.polypheny.control.client.ClientType;
 import org.polypheny.control.client.PolyphenyControlConnector;
 import org.polypheny.control.main.ControlCommand;
+
 
 public class ControlTest {
 
@@ -46,6 +50,16 @@ public class ControlTest {
         if ( polyphenyDir.exists() ) {
             polyphenyDir.renameTo( new File( System.getProperty( "user.home" ), ".polypheny.backup" ) );
         }
+
+        // Create passwd data and an account
+        try {
+            FileUtils.forceMkdir( new File( System.getProperty( "user.home" ), ".polypheny" ) );
+        } catch ( IOException e ) {
+//            e.printStackTrace();
+        }
+        AuthenticationFileManager.getAuthenticationData();
+        AuthenticationDataManager.addAuthenticationData( "pc", "pc" );
+        AuthenticationFileManager.writeAuthenticationDataToFile();
 
         thread = new Thread( () -> (new ControlCommand())._run_() );
         thread.start();
@@ -67,7 +81,8 @@ public class ControlTest {
 
     @Test
     public void integrationTest() throws URISyntaxException, InterruptedException {
-        PolyphenyControlConnector controlConnector = new PolyphenyControlConnector( "localhost:8070", ClientType.BROWSER, null );
+        ClientData clientData = new ClientData( ClientType.BROWSER, "pc", "pc" );
+        PolyphenyControlConnector controlConnector = new PolyphenyControlConnector( "localhost:8070", clientData, null );
 
         // Update and build Polypheny
         controlConnector.updatePolypheny();
