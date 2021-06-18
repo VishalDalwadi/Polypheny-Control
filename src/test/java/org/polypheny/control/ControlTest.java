@@ -26,9 +26,9 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.polypheny.control.authentication.AuthenticationDataManager;
 import org.polypheny.control.authentication.AuthenticationFileManager;
@@ -43,8 +43,11 @@ public class ControlTest {
     private static Thread thread;
 
 
-    @BeforeClass
+    @Before
     public static void start() throws InterruptedException {
+        // Precautionary measure: Setting the systemProperty 'testing'
+        System.setProperty( "testing", "true" );
+
         // Backup config file
         File polyphenyDir = new File( System.getProperty( "user.home" ), ".polypheny" );
         if ( polyphenyDir.exists() ) {
@@ -67,7 +70,7 @@ public class ControlTest {
     }
 
 
-    @AfterClass
+    @After
     public static void shutdown() throws IOException {
         // Restore config file
         File polyphenyDir = new File( System.getProperty( "user.home" ), ".polypheny" );
@@ -80,6 +83,19 @@ public class ControlTest {
 
 
     @Test
+    public void integrationTestWithAuthEnabled() throws URISyntaxException, InterruptedException {
+        System.setProperty( "withAuth", "true" );
+        integrationTest();
+    }
+
+
+    @Test
+    public void integrationTestWithAuthDisabled() throws URISyntaxException, InterruptedException {
+        System.setProperty( "withAuth", "false" );
+        integrationTest();
+    }
+
+
     public void integrationTest() throws URISyntaxException, InterruptedException {
         ClientData clientData = new ClientData( ClientType.BROWSER, "pc", "pc" );
         PolyphenyControlConnector controlConnector = new PolyphenyControlConnector( "localhost:8070", clientData, null );

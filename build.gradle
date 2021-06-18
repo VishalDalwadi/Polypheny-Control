@@ -212,6 +212,9 @@ task extractWebjars(type: Copy) {
 }
 classes.dependsOn(extractWebjars)
 
+test {
+    systemProperty "testing", "true"
+}
 
 //////////////
 // IntelliJ //
